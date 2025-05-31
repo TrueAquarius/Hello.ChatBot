@@ -14,6 +14,7 @@ public class Program
     private static AzureOpenAIClient azureClient;
     private static ChatClient chatClient;
     private static Configuration config = Configuration.Instance;
+    private static ChatCompletionOptions chatOptions;
 
     // Chatverlauf speichern (SystemPrompt + User/Bot-Paare)
     private static readonly List<ChatMessage> chatHistory = new();
@@ -41,24 +42,42 @@ public class Program
             return;
         }
 
-
         azureClient = new(
             new Uri(azureOpenAIEndpoint),
             new AzureKeyCredential(azureOpenAIAPIKey));
 
-        chatClient = azureClient.GetChatClient(config.LLM_DeploymentName);
+        chatClient = azureClient.GetChatClient(config.DeploymentName);
 
-        // Start the Chat with the user
+        // Set additional parameters such as temperature  
+        SetChatOptions();
+
+        // Start the Chat with the user  
         Console.ForegroundColor = SystemColor;
         Console.WriteLine("Welcome to the TrueAquarius ChatBot!");
-        Console.Write("You are using Model ");
+        Console.Write(" - Current model:       ");
         Console.ForegroundColor = InfoColor;
-        Console.WriteLine(config.LLM_DeploymentName);
+        Console.WriteLine(config.DeploymentName);
+
         Console.ForegroundColor = SystemColor;
-        Console.WriteLine("\n\n========== start chatting now ===========================");
+        Console.Write(" - History max. length: ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.HistoryLength);
+
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - Temperature:         ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.Temperature);
+
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - Max. Output Tokens:  ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.MaxOutputTokenCount);
+
+        Console.ForegroundColor = SystemColor;
+        Console.WriteLine("\n========== start chatting now =========================");
         Console.WriteLine("Type '/help' for help. Type '/exit' or '/quit' to quit.\n");
 
-        // SystemPrompt immer als erste Nachricht im Verlauf
+        // SystemPrompt immer als erste Nachricht im Verlauf  
         chatHistory.Clear();
         chatHistory.Add(new SystemChatMessage(config.SystemPrompt));
 
@@ -83,21 +102,21 @@ public class Program
             switch (commandType)
             {
                 case CommandType.PROMPT:
-                    // User prompt is valid, continue to process it
+                    // User prompt is valid, continue to process it  
                     break;
                 case CommandType.EMPTY:
-                    // User entered an empty command, prompt again
+                    // User entered an empty command, prompt again  
                     continue;
                 case CommandType.COMMAND:
-                    // Command was handled, continue to next iteration
+                    // Command was handled, continue to next iteration  
                     continue;
 
             }
 
-            // Füge die Benutzernachricht zum Verlauf hinzu
+            // Füge die Benutzernachricht zum Verlauf hinzu  
             chatHistory.Add(new UserChatMessage(userPrompt));
 
-            var response = chatClient.CompleteChatStreaming(chatHistory);
+            var response = chatClient.CompleteChatStreaming(chatHistory, chatOptions);
 
             Console.ForegroundColor = BotColor;
             var botResponseBuilder = new System.Text.StringBuilder();
@@ -111,12 +130,11 @@ public class Program
             }
             System.Console.WriteLine("");
 
-            // Füge die Bot-Antwort zum Verlauf hinzu
+            // Füge die Bot-Antwort zum Verlauf hinzu  
             chatHistory.Add(new AssistantChatMessage(botResponseBuilder.ToString()));
 
             CutChatHistory();
         }
-
 
         // Clean up and say bye  
         Console.ForegroundColor = SystemColor;
@@ -124,6 +142,16 @@ public class Program
         Console.ResetColor();
     }
 
+
+    private static void SetChatOptions()
+    {
+        // Set additional parameters such as temperature  
+        chatOptions = new ChatCompletionOptions
+        {
+            Temperature = config.Temperature, // Adjust temperature as needed
+            MaxOutputTokenCount = config.MaxOutputTokenCount
+        };
+    }
 
 
     private static void CutChatHistory()
@@ -179,9 +207,13 @@ public class Program
                 return CommandType.COMMAND;
             case "history":
                 return HistoryCommand(CommandBody(commandLine));
+            case "temperature":
+                return TemperatureCommand(CommandBody(commandLine));
+            case "tokens":
+                return TokensCommand(CommandBody(commandLine));
             default:
                 Console.ForegroundColor = ErrorColor;
-                Console.WriteLine("Unknown command. Type 'exit' or 'quit' to break.");
+                Console.WriteLine("Unknown command. Type '/help' to see list of commands.");
                 return CommandType.EMPTY;
         }
     }
@@ -201,13 +233,17 @@ public class Program
     {
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("Available commands:");
-        Console.WriteLine("/clear            -   Clear chat history");
-        Console.WriteLine("/help             -   Show this help message");
-        Console.WriteLine("/history          -   Show history length");
-        Console.WriteLine("/history [length] -   Set history length");
-        Console.WriteLine("/model            -   Show the current model");
-        Console.WriteLine("/model [model]    -   Set the current model");
-        Console.WriteLine("/exit or /quit    -   Exit the chat");
+        Console.WriteLine("/clear               -   Clear chat history");
+        Console.WriteLine("/help                -   Show this help message");
+        Console.WriteLine("/history             -   Show history length");
+        Console.WriteLine("/history [length]    -   Set history length");
+        Console.WriteLine("/model               -   Show the current model");
+        Console.WriteLine("/model [model]       -   Set the model");
+        Console.WriteLine("/temperature         -   Show the temperature");
+        Console.WriteLine("/temperature [value] -   Set the current temperature");
+        Console.WriteLine("/tokens              -   Show the current max. output tokens");
+        Console.WriteLine("/tokens [value]      -   Set the max. output tokens");
+        Console.WriteLine("/exit or /quit       -   Exit the chat");
         Console.WriteLine("Type your question or prompt to start chatting with the AI.");
 
         return CommandType.COMMAND;
@@ -218,19 +254,19 @@ public class Program
         if (string.IsNullOrEmpty(commandLine))
         {
             Console.ForegroundColor = InfoColor;
-            Console.WriteLine("Current Model: " + config.LLM_DeploymentName);
+            Console.WriteLine("Current Model: " + config.DeploymentName);
             return CommandType.COMMAND;
         }
 
         string[] parts = commandLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        chatClient = azureClient.GetChatClient(config.LLM_DeploymentName);
+        chatClient = azureClient.GetChatClient(config.DeploymentName);
 
-        config.LLM_DeploymentName = parts[0];
+        config.DeploymentName = parts[0];
         config.Save();
 
         Console.ForegroundColor = InfoColor;
-        Console.WriteLine("Model changed to: " + config.LLM_DeploymentName);
+        Console.WriteLine("Model changed to: " + config.DeploymentName);
 
         return CommandType.COMMAND;
     }
@@ -252,7 +288,7 @@ public class Program
         if (!success || newHistoryLength < 0)
         {
             Console.ForegroundColor = ErrorColor;
-            Console.WriteLine("Invalid history length. Please enter a valid number greater than zero.");
+            Console.WriteLine("Invalid history length. Please enter a valid number greater than or equal to zero.");
             return CommandType.COMMAND;
         }
 
@@ -263,6 +299,71 @@ public class Program
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("History length set to: " + config.HistoryLength);
 
+        return CommandType.COMMAND;
+    }
+
+
+    private static CommandType TokensCommand(string commandLine)
+    {
+        if (string.IsNullOrEmpty(commandLine))
+        {
+            Console.ForegroundColor = InfoColor;
+            Console.WriteLine("Current max. output tokens: " + config.MaxOutputTokenCount);
+            return CommandType.COMMAND;
+        }
+
+        string[] parts = commandLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        bool success = int.TryParse(parts[0], out int newTokenCount);
+
+        if (!success || newTokenCount <= 0)
+        {
+            Console.ForegroundColor = ErrorColor;
+            Console.WriteLine("Invalid token count. Please enter a valid number greater than zero.");
+            return CommandType.COMMAND;
+        }
+
+        config.MaxOutputTokenCount = newTokenCount;
+        config.Save();
+
+        SetChatOptions();
+
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine("Max. Output Token set to: " + config.MaxOutputTokenCount);
+
+        return CommandType.COMMAND;
+    }
+
+
+
+    private static CommandType TemperatureCommand(string commandLine)
+    {
+        if (string.IsNullOrEmpty(commandLine))
+        {
+            Console.ForegroundColor = InfoColor;
+            Console.WriteLine("Current temperature: " + config.Temperature);
+            return CommandType.COMMAND;
+        }
+
+        string[] parts = commandLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        
+        bool success = float.TryParse(parts[0], out float newTemperature);
+        
+        if (!success || newTemperature < 0 || newTemperature > 1)
+        {
+            Console.ForegroundColor = ErrorColor;
+            Console.WriteLine("Invalid temperature. Please enter a valid number between 0 and 1.");
+            return CommandType.COMMAND;
+        }
+
+        config.Temperature = newTemperature;
+        config.Save();
+        
+        SetChatOptions();
+
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine("Temperature set to: " + config.Temperature);
+        
         return CommandType.COMMAND;
     }
 }

@@ -1,6 +1,8 @@
 # Hello.ChatBot  
 
-This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.  
+This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.
+
+Like all my "Hello"-projects, this is more a Hello World version of a chat bot. however, it has evolved into a quite useful tool for those peole who want to user their own instance of OpenAI.
 
 ## Features  
 - Chat with your Azure OpenAI instance from your Console  
@@ -50,6 +52,6 @@ Type any prompt and get an answer from Azure OpenAI.
 
 Change settings with `/`-commands. Type `/help` to get list of commands.
 
-enjoy it!!!
+**Enjoy it!!!**
 
 

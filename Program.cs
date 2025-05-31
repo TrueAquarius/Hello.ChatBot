@@ -64,7 +64,6 @@ public class Program
 
         while (true)
         {
-            Console.WriteLine("History: " + chatHistory.Count);
             Console.ForegroundColor = UserColor;
             Console.Write("\n> ");
             string userPrompt = Console.ReadLine();
@@ -115,13 +114,7 @@ public class Program
             // Füge die Bot-Antwort zum Verlauf hinzu
             chatHistory.Add(new AssistantChatMessage(botResponseBuilder.ToString()));
 
-            // Verlauf ggf. kürzen (SystemPrompt bleibt immer erhalten)
-            int maxHistory = config.HistoryLength * 2; // User+Bot pro Runde
-            if (chatHistory.Count > maxHistory + 1)
-            {
-                // Entferne die ältesten User+Bot-Paare, SystemPrompt bleibt
-                chatHistory.RemoveRange(1, chatHistory.Count - (maxHistory + 1));
-            }
+            CutChatHistory();
         }
 
 
@@ -130,6 +123,20 @@ public class Program
         Console.WriteLine("\nBye bye!\nIt was fun to talk to you.\n\n\n");
         Console.ResetColor();
     }
+
+
+
+    private static void CutChatHistory()
+    {
+        // Verlauf ggf. kürzen (SystemPrompt bleibt immer erhalten)
+        int maxHistory = config.HistoryLength * 2; // User+Bot pro Runde
+        if (chatHistory.Count > maxHistory + 1)
+        {
+            // Entferne die ältesten User+Bot-Paare, SystemPrompt bleibt
+            chatHistory.RemoveRange(1, chatHistory.Count - (maxHistory + 1));
+        }
+    }
+
 
 
     /// <summary>
@@ -167,6 +174,11 @@ public class Program
                 return HelpCommand(CommandBody(commandLine));
             case "model":
                 return ModelCommand(CommandBody(commandLine));
+            case "clear":
+                chatHistory.RemoveRange(1, chatHistory.Count - 1); // Keep only the SystemPrompt
+                return CommandType.COMMAND;
+            case "history":
+                return HistoryCommand(CommandBody(commandLine));
             default:
                 Console.ForegroundColor = ErrorColor;
                 Console.WriteLine("Unknown command. Type 'exit' or 'quit' to break.");
@@ -189,10 +201,13 @@ public class Program
     {
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("Available commands:");
-        Console.WriteLine("/help            -   Show this help message");
-        Console.WriteLine("/model           -   Show the current model");
-        Console.WriteLine("/model [model]   -   Set the current model");
-        Console.WriteLine("/exit or /quit   -   Exit the chat");
+        Console.WriteLine("/clear            -   Clear chat history");
+        Console.WriteLine("/help             -   Show this help message");
+        Console.WriteLine("/history          -   Show history length");
+        Console.WriteLine("/history [length] -   Set history length");
+        Console.WriteLine("/model            -   Show the current model");
+        Console.WriteLine("/model [model]    -   Set the current model");
+        Console.WriteLine("/exit or /quit    -   Exit the chat");
         Console.WriteLine("Type your question or prompt to start chatting with the AI.");
 
         return CommandType.COMMAND;
@@ -216,6 +231,37 @@ public class Program
 
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("Model changed to: " + config.LLM_DeploymentName);
+
+        return CommandType.COMMAND;
+    }
+
+    private static CommandType HistoryCommand(string commandLine)
+    {
+        if (string.IsNullOrEmpty(commandLine))
+        {
+            Console.ForegroundColor = InfoColor;
+            Console.WriteLine("Current history length: " + chatHistory.Count / 2);
+            Console.WriteLine("Max history length:     " + config.HistoryLength);
+            return CommandType.COMMAND;
+        }
+
+        string[] parts = commandLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        bool success = int.TryParse(parts[0], out int newHistoryLength);
+
+        if (!success || newHistoryLength < 0)
+        {
+            Console.ForegroundColor = ErrorColor;
+            Console.WriteLine("Invalid history length. Please enter a valid number greater than zero.");
+            return CommandType.COMMAND;
+        }
+
+        config.HistoryLength = newHistoryLength;
+        config.Save();
+        CutChatHistory();
+
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine("History length set to: " + config.HistoryLength);
 
         return CommandType.COMMAND;
     }

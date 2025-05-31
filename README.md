@@ -5,7 +5,8 @@ This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.
 ## Features
 - Chat with your Azure OpenAI instance from your Console
 - Switch between different models (more precisely: switch between different deployments) with the `/model` command.
-- Basic chat history
+- Chat history; length of history can be set with `\history` commad.
+- Get help with `\help` command
 
 
 ## Requirements
@@ -33,6 +34,11 @@ The default deployment name right after setup is 'gpt-4o'. If your deployment na
 ```
 /model [your deployment name]
 ```
+
+## How to use it
+Type any prompt and get an answer from Azure OpenAI.
+
+Change settings with `/`-commands. Type `/help` to get list of commands.
 
 enjoy it!!!
 

@@ -186,6 +186,9 @@ public class Program
             case "config":
                 ShowConfig();
                 return CommandType.COMMAND;
+            case "system":
+                ShowSystemPrompt();
+                return CommandType.COMMAND;
             case "model":
                 return ModelCommand(CommandBody(commandLine));
             case "clear":
@@ -228,6 +231,7 @@ public class Program
         Console.WriteLine("/model               -   Show the current model");
         Console.WriteLine("/model [model]       -   Set the model");
         Console.WriteLine("/quit or /exit       -   Exit the chat");
+        Console.WriteLine("/system              -   Show the system prompt");
         Console.WriteLine("/temperature         -   Show the temperature");
         Console.WriteLine("/temperature [value] -   Set the current temperature");
         Console.WriteLine("/tokens              -   Show the current max. output tokens");
@@ -237,6 +241,13 @@ public class Program
         return CommandType.COMMAND;
     }
 
+    private static void ShowSystemPrompt()
+    {
+        Console.ForegroundColor = SystemColor;
+        Console.WriteLine("Current system prompt:");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.SystemPrompt);
+    }
 
 
     private static void ShowConfig()

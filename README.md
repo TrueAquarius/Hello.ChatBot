@@ -5,6 +5,8 @@ This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.
 ## Features
 - Chat with your Azure OpenAI instance from your Console
 - Switch between different models (more precisely: switch between different deployments) with the `/model` command.
+- Basic chat history
+
 
 ## Requirements
 

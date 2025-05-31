@@ -15,6 +15,9 @@ public class Program
     private static ChatClient chatClient;
     private static Configuration config = Configuration.Instance;
 
+    // Chatverlauf speichern (SystemPrompt + User/Bot-Paare)
+    private static readonly List<ChatMessage> chatHistory = new();
+
     // Define colors for different message types
     private const ConsoleColor UserColor = ConsoleColor.Cyan;
     private const ConsoleColor BotColor = ConsoleColor.Green;
@@ -55,8 +58,13 @@ public class Program
         Console.WriteLine("\n\n========== start chatting now ===========================");
         Console.WriteLine("Type '/help' for help. Type '/exit' or '/quit' to quit.\n");
 
+        // SystemPrompt immer als erste Nachricht im Verlauf
+        chatHistory.Clear();
+        chatHistory.Add(new SystemChatMessage(config.SystemPrompt));
+
         while (true)
         {
+            Console.WriteLine("History: " + chatHistory.Count);
             Console.ForegroundColor = UserColor;
             Console.Write("\n> ");
             string userPrompt = Console.ReadLine();
@@ -84,29 +92,36 @@ public class Program
                 case CommandType.COMMAND:
                     // Command was handled, continue to next iteration
                     continue;
-                
+
             }
 
-            // Combine retrieved content into a system message or context
-            string promptWithContext = $"{userPrompt}";
+            // Füge die Benutzernachricht zum Verlauf hinzu
+            chatHistory.Add(new UserChatMessage(userPrompt));
 
-            List<ChatMessage> messages = new List<ChatMessage>()
-            {
-                new SystemChatMessage(config.SystemPrompt),
-                new UserChatMessage(promptWithContext),
-            };
-
-            var response = chatClient.CompleteChatStreaming(messages);
+            var response = chatClient.CompleteChatStreaming(chatHistory);
 
             Console.ForegroundColor = BotColor;
+            var botResponseBuilder = new System.Text.StringBuilder();
             foreach (StreamingChatCompletionUpdate update in response)
             {
                 foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
                 {
                     System.Console.Write(updatePart.Text);
+                    botResponseBuilder.Append(updatePart.Text);
                 }
             }
             System.Console.WriteLine("");
+
+            // Füge die Bot-Antwort zum Verlauf hinzu
+            chatHistory.Add(new AssistantChatMessage(botResponseBuilder.ToString()));
+
+            // Verlauf ggf. kürzen (SystemPrompt bleibt immer erhalten)
+            int maxHistory = config.HistoryLength * 2; // User+Bot pro Runde
+            if (chatHistory.Count > maxHistory + 1)
+            {
+                // Entferne die ältesten User+Bot-Paare, SystemPrompt bleibt
+                chatHistory.RemoveRange(1, chatHistory.Count - (maxHistory + 1));
+            }
         }
 
 
@@ -191,7 +206,7 @@ public class Program
             Console.WriteLine("Current Model: " + config.LLM_DeploymentName);
             return CommandType.COMMAND;
         }
-        
+
         string[] parts = commandLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         chatClient = azureClient.GetChatClient(config.LLM_DeploymentName);

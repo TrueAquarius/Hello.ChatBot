@@ -11,7 +11,7 @@ namespace TrueAquarius.ChatBot
     {
         public string LLM_DeploymentName { get; set; } = "gpt-4.1";
         public int MaxTokens { get; set; } = 1000;
-        public int HistoryLength { get; set; } = 10;
+        public int HistoryLength { get; set; } = 5;
         public string SystemPrompt { get; set; } = "You are a helpful assistant. Please answer the user's questions to the best of your ability.";
     }
 }

@@ -1,12 +1,13 @@
-# Hello.ChatBot
-
-This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.
-
-## Screenshot
-
 # Hello.ChatBot  
 
 This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.  
+
+## Features  
+- Chat with your Azure OpenAI instance from your Console  
+- Switch between different models (more precisely: switch between different deployments) with the `/model` command.  
+- Chat history; length of history can be set with `\history` commad.  
+- Get help with `\help` command  
+
 
 ## Screenshot  
 - The following screenshot shows the start of a chat. The user asks a question; the bot answers.
@@ -15,12 +16,6 @@ This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.
 - the user asks another question
 
 ![Screenshot](./_Documents/Screenshot.png)  
-
-## Features  
-- Chat with your Azure OpenAI instance from your Console  
-- Switch between different models (more precisely: switch between different deployments) with the `/model` command.  
-- Chat history; length of history can be set with `\history` commad.  
-- Get help with `\help` command  
 
 ## Requirements  
 

@@ -53,25 +53,8 @@ public class Program
 
         // Start the Chat with the user  
         Console.ForegroundColor = SystemColor;
-        Console.WriteLine("Welcome to the TrueAquarius ChatBot!");
-        Console.Write(" - Current model:       ");
-        Console.ForegroundColor = InfoColor;
-        Console.WriteLine(config.DeploymentName);
-
-        Console.ForegroundColor = SystemColor;
-        Console.Write(" - History max. length: ");
-        Console.ForegroundColor = InfoColor;
-        Console.WriteLine(config.HistoryLength);
-
-        Console.ForegroundColor = SystemColor;
-        Console.Write(" - Temperature:         ");
-        Console.ForegroundColor = InfoColor;
-        Console.WriteLine(config.Temperature);
-
-        Console.ForegroundColor = SystemColor;
-        Console.Write(" - Max. Output Tokens:  ");
-        Console.ForegroundColor = InfoColor;
-        Console.WriteLine(config.MaxOutputTokenCount);
+        Console.WriteLine("Welcome to the TrueAquarius ChatBot!\n");
+        ShowConfig();
 
         Console.ForegroundColor = SystemColor;
         Console.WriteLine("\n========== start chatting now =========================");
@@ -200,6 +183,9 @@ public class Program
                 return CommandType.EXIT;
             case "help":
                 return HelpCommand(CommandBody(commandLine));
+            case "config":
+                ShowConfig();
+                return CommandType.COMMAND;
             case "model":
                 return ModelCommand(CommandBody(commandLine));
             case "clear":
@@ -234,19 +220,47 @@ public class Program
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("Available commands:");
         Console.WriteLine("/clear               -   Clear chat history");
+        Console.WriteLine("/config              -   Show configuration");
+        Console.WriteLine("/exit or /quit       -   Exit the chat");
         Console.WriteLine("/help                -   Show this help message");
         Console.WriteLine("/history             -   Show history length");
         Console.WriteLine("/history [length]    -   Set history length");
         Console.WriteLine("/model               -   Show the current model");
         Console.WriteLine("/model [model]       -   Set the model");
+        Console.WriteLine("/quit or /exit       -   Exit the chat");
         Console.WriteLine("/temperature         -   Show the temperature");
         Console.WriteLine("/temperature [value] -   Set the current temperature");
         Console.WriteLine("/tokens              -   Show the current max. output tokens");
         Console.WriteLine("/tokens [value]      -   Set the max. output tokens");
-        Console.WriteLine("/exit or /quit       -   Exit the chat");
         Console.WriteLine("Type your question or prompt to start chatting with the AI.");
 
         return CommandType.COMMAND;
+    }
+
+
+
+    private static void ShowConfig()
+    {
+        Console.ForegroundColor = SystemColor;
+        Console.WriteLine("Current configuration:");
+        Console.Write(" - Current model:       ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.DeploymentName);
+
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - History max. length: ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.HistoryLength);
+
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - Temperature:         ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.Temperature);
+
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - Max. Output Tokens:  ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(config.MaxOutputTokenCount);
     }
 
     private static CommandType ModelCommand(string commandLine)

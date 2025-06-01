@@ -1,22 +1,17 @@
 ﻿using Azure;
-using TrueAquarius.ConfigManager;
-using TrueAquarius.ChatBot;
 using Azure.AI.OpenAI;
-using System.Net;
 using OpenAI.Chat;
-using System.Diagnostics;
 
 
 namespace TrueAquarius.ChatBot;
 
-public class Program
-{
-    private static AzureOpenAIClient azureClient;
-    private static ChatClient chatClient;
-    private static Configuration config = Configuration.Instance;
-    private static ChatCompletionOptions chatOptions;
 
-    // Chatverlauf speichern (SystemPrompt + User/Bot-Paare)
+public static class Program
+{
+    private static AzureOpenAIClient? azureClient;
+    private static ChatClient? chatClient;
+    private static Configuration config = Configuration.Instance;
+    private static ChatCompletionOptions? chatOptions;
     private static readonly List<ChatMessage> chatHistory = new();
 
     // Define colors for different message types
@@ -30,8 +25,8 @@ public class Program
     public static void Main(string[] args)
     {
         // Replace with your own OpenAI API key and model  
-        string azureOpenAIAPIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
-        string azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
+        string? azureOpenAIAPIKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
+        string? azureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
 
         if (string.IsNullOrEmpty(azureOpenAIAPIKey)
             || string.IsNullOrEmpty(azureOpenAIEndpoint))
@@ -45,33 +40,35 @@ public class Program
         azureClient = new(
             new Uri(azureOpenAIEndpoint),
             new AzureKeyCredential(azureOpenAIAPIKey));
-
+        
         chatClient = azureClient.GetChatClient(config.DeploymentName);
 
         // Set additional parameters such as temperature  
-        SetChatOptions();
+        SetChatOptionsToCurrentConfiguration();
 
         // Start the Chat with the user  
         Console.ForegroundColor = SystemColor;
         Console.WriteLine("Welcome to the TrueAquarius ChatBot!\n" + BuildInfo.All + "\n");
 
-        ShowConfig();
+        ShowCurrentConfiguration();
 
         Console.ForegroundColor = SystemColor;
         Console.WriteLine("\n========== start chatting now =========================");
         Console.WriteLine("Type '/help' for help. Type '/exit' or '/quit' to quit.\n");
 
-        // SystemPrompt immer als erste Nachricht im Verlauf  
+        // Initialize History  
         chatHistory.Clear();
         chatHistory.Add(new SystemChatMessage(config.SystemPrompt));
 
         while (true)
         {
+            // Prompt the user for input
             Console.ForegroundColor = UserColor;
             Console.Write("\n> ");
-            string userPrompt = Console.ReadLine();
+            string? userPrompt = Console.ReadLine();
             Console.WriteLine("");
 
+            // Check if the user input is null or empty
             if (string.IsNullOrEmpty(userPrompt))
             {
                 Console.ForegroundColor = ErrorColor;
@@ -79,8 +76,10 @@ public class Program
                 continue;
             }
 
+            // Handle the command input by the user
             CommandType commandType = HandleCommand(userPrompt);
 
+            // Check if the command type is EXIT, if so, break the loop to exit the chat
             if (commandType == CommandType.EXIT) break;
 
             switch (commandType)
@@ -94,10 +93,9 @@ public class Program
                 case CommandType.COMMAND:
                     // Command was handled, continue to next iteration  
                     continue;
-
             }
 
-            // Füge die Benutzernachricht zum Verlauf hinzu  
+            // Add user message to chat  
             chatHistory.Add(new UserChatMessage(userPrompt));
 
             try
@@ -126,18 +124,19 @@ public class Program
             {
                 Console.ForegroundColor = ErrorColor;
                 Console.WriteLine($"Error: {ex.Message}");
-                
             }
         }
 
-        // Clean up and say bye  
+        // Clean up, kiss and say bye bye
         Console.ForegroundColor = SystemColor;
         Console.WriteLine("\nBye bye!\nIt was fun to talk to you.\n\n\n");
         Console.ResetColor();
     }
 
-
-    private static void SetChatOptions()
+    /// <summary>
+    /// Sets the chat options based on the current configuration.
+    /// </summary>
+    private static void SetChatOptionsToCurrentConfiguration()
     {
         // Set additional parameters such as temperature  
         chatOptions = new ChatCompletionOptions
@@ -147,7 +146,9 @@ public class Program
         };
     }
 
-
+    /// <summary>
+    /// Cuts the chat history to max history length specified in the configuration.
+    /// </summary>
     private static void CutChatHistory()
     {
         // Verlauf ggf. kürzen (SystemPrompt bleibt immer erhalten)
@@ -195,7 +196,7 @@ public class Program
             case "help":
                 return HelpCommand(CommandBody(commandLine));
             case "config":
-                ShowConfig();
+                ShowCurrentConfiguration();
                 return CommandType.COMMAND;
             case "system":
                 ShowSystemPrompt();
@@ -221,6 +222,13 @@ public class Program
         }
     }
 
+
+    /// <summary>
+    /// Removes the actual command part from the command line input and 
+    /// returns all parameters (the "body" of the command).
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     private static string CommandBody(string command)
     {
         if (string.IsNullOrEmpty(command) || !command.Contains(' '))
@@ -232,6 +240,11 @@ public class Program
     }
 
 
+    /// <summary>
+    /// Displays the help message with available commands and their descriptions.
+    /// </summary>
+    /// <param name="commandLine"></param>
+    /// <returns></returns>
     private static CommandType HelpCommand(string commandLine)
     {
         Console.ForegroundColor = InfoColor;
@@ -256,6 +269,10 @@ public class Program
         return CommandType.COMMAND;
     }
 
+
+    /// <summary>
+    /// Displays the current system prompt of the chat bot.
+    /// </summary>
     private static void ShowSystemPrompt()
     {
         Console.ForegroundColor = SystemColor;
@@ -265,7 +282,10 @@ public class Program
     }
 
 
-    private static void ShowConfig()
+    /// <summary>
+    /// Displays the current configuration of the chat bot, including model, history length, temperature, and max output tokens.
+    /// </summary>
+    private static void ShowCurrentConfiguration()
     {
         Console.ForegroundColor = SystemColor;
         Console.WriteLine("Current configuration:");
@@ -289,6 +309,10 @@ public class Program
         Console.WriteLine(config.MaxOutputTokenCount);
     }
 
+
+    /// <summary>
+    /// Displays the version information of the chat bot application.
+    /// </summary>
     private static void ShowVersion()
     {
         Console.ForegroundColor = SystemColor;
@@ -307,6 +331,12 @@ public class Program
         Console.WriteLine(BuildInfo.BuildDate);
     }
 
+
+    /// <summary>
+    /// Handles the model command input by the user.
+    /// </summary>
+    /// <param name="commandLine"></param>
+    /// <returns></returns>
     private static CommandType ModelCommand(string commandLine)
     {
         if (string.IsNullOrEmpty(commandLine))
@@ -329,6 +359,12 @@ public class Program
         return CommandType.COMMAND;
     }
 
+
+    /// <summary>
+    /// Handles the history command input by the user.
+    /// </summary>
+    /// <param name="commandLine"></param>
+    /// <returns></returns>
     private static CommandType HistoryCommand(string commandLine)
     {
         if (string.IsNullOrEmpty(commandLine))
@@ -361,6 +397,11 @@ public class Program
     }
 
 
+    /// <summary>
+    /// Handles the tokens command input by the user.
+    /// </summary>
+    /// <param name="commandLine"></param>
+    /// <returns></returns>
     private static CommandType TokensCommand(string commandLine)
     {
         if (string.IsNullOrEmpty(commandLine))
@@ -384,7 +425,7 @@ public class Program
         config.MaxOutputTokenCount = newTokenCount;
         config.Save();
 
-        SetChatOptions();
+        SetChatOptionsToCurrentConfiguration();
 
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("Max. Output Token set to: " + config.MaxOutputTokenCount);
@@ -393,7 +434,11 @@ public class Program
     }
 
 
-
+    /// <summary>
+    /// Handles the temperature command input by the user.
+    /// </summary>
+    /// <param name="commandLine"></param>
+    /// <returns></returns>
     private static CommandType TemperatureCommand(string commandLine)
     {
         if (string.IsNullOrEmpty(commandLine))
@@ -417,7 +462,7 @@ public class Program
         config.Temperature = newTemperature;
         config.Save();
         
-        SetChatOptions();
+        SetChatOptionsToCurrentConfiguration();
 
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("Temperature set to: " + config.Temperature);

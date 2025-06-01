@@ -10,7 +10,7 @@ public static class BuildInfo
     /// The date and time when the build was created.
     /// Automatically updated by the build process.
     /// </summary>
-    public const string BuildDate = "01.06.2025 12:00 +02:00";
+    public const string BuildDate = "01.06.2025 12:00 +02:00"; // DO NOT CHANGE THIS MANUALLY! This is automatically updated by the build process.
 
     /// <summary>
     /// The build number of the application.
@@ -22,7 +22,7 @@ public static class BuildInfo
     /// Version number of the application.
     /// Must be updates manually when a new version is released.
     /// </summary>
-    public const string Version = "V1.0.5";
+    public const string Version = "V1.0.6";
 
     /// <summary>
     /// Combines the version and build number into a single string for display purposes.

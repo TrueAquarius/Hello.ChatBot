@@ -285,10 +285,10 @@ public class Program
 
         string[] parts = commandLine.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        chatClient = azureClient.GetChatClient(config.DeploymentName);
-
         config.DeploymentName = parts[0];
         config.Save();
+
+        chatClient = azureClient.GetChatClient(config.DeploymentName);
 
         Console.ForegroundColor = InfoColor;
         Console.WriteLine("Model changed to: " + config.DeploymentName);

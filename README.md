@@ -54,3 +54,22 @@ Change settings with `/`-commands. Type `/help` to get list of commands.
 **Enjoy it!!!**
 
 
+## How to make new release
+Building a release is supported by an GitHub Action (release.yml), which gets triggered when a `git push` contains a tag which starts with the letter '`v`' like '`v1.0.0`'.
+
+Extract form release.yml:
+```yml
+on:
+  push:
+    tags:
+      - 'v*'
+```
+
+In Visual Studio 2022, open a new terminal. Create a new tag with the release number:
+```powershell
+git tag -a v1.0.0 -m "Release version 1.0.0"
+```
+Make a local commit. Then push from terminal with tag number:
+```powershell
+git push origin v1.0.0
+```

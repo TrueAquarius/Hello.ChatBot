@@ -7,7 +7,7 @@ Like all my "Hello"-projects, this is more a Hello World version of a chat bot. 
 ## Features  
 - Chat with your Azure OpenAI instance from your Console  
 - Switch between different models (more precisely: switch between different deployments) with the `/model` command.  
-- Chat history; length of history can be set with `\history` commad.  
+- Chat history; length of history can be set with `\history` command.  
 - Get help with `\help` command  
 
 

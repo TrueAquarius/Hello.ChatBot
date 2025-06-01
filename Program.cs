@@ -99,24 +99,34 @@ public class Program
             // Füge die Benutzernachricht zum Verlauf hinzu  
             chatHistory.Add(new UserChatMessage(userPrompt));
 
-            var response = chatClient.CompleteChatStreaming(chatHistory, chatOptions);
-
-            Console.ForegroundColor = BotColor;
-            var botResponseBuilder = new System.Text.StringBuilder();
-            foreach (StreamingChatCompletionUpdate update in response)
+            try
             {
-                foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
+                var response = chatClient.CompleteChatStreaming(chatHistory, chatOptions);
+
+                Console.ForegroundColor = BotColor;
+                var botResponseBuilder = new System.Text.StringBuilder();
+                foreach (StreamingChatCompletionUpdate update in response)
                 {
-                    System.Console.Write(updatePart.Text);
-                    botResponseBuilder.Append(updatePart.Text);
+                    foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
+                    {
+                        System.Console.Write(updatePart.Text);
+                        botResponseBuilder.Append(updatePart.Text);
+                    }
                 }
+            
+                System.Console.WriteLine("");
+
+                // Füge die Bot-Antwort zum Verlauf hinzu  
+                chatHistory.Add(new AssistantChatMessage(botResponseBuilder.ToString()));
+
+                CutChatHistory();
             }
-            System.Console.WriteLine("");
-
-            // Füge die Bot-Antwort zum Verlauf hinzu  
-            chatHistory.Add(new AssistantChatMessage(botResponseBuilder.ToString()));
-
-            CutChatHistory();
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ErrorColor;
+                Console.WriteLine($"Error: {ex.Message}");
+                
+            }
         }
 
         // Clean up and say bye  

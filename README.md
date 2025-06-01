@@ -2,7 +2,7 @@
 
 This is a simple Chatbot using **Azure OpenAI**. It runs in your Console.
 
-Like all my "Hello"-projects, this is a "Hello World" version of a chat bot, meaning that it is meant to be an experiment and not meant to be for production. However, it has evolved into a quite useful tool. It is for those people who want to user their own instance of OpenAI without going through commercial portals such as ChatGPT.
+Like all my "Hello"-projects, this is a "Hello World" version of a chat bot, meaning that it is meant to be an experiment and not meant to be for production. However, it has evolved into a quite useful tool. It is good for those people who want to user their own instance of OpenAI without going through commercial portals such as ChatGPT.
 
 ## Features  
 - Chat with your Azure OpenAI instance from your Console  

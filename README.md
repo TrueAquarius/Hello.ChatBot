@@ -20,7 +20,6 @@ Like all my "Hello"-projects, this is more a Hello World version of a chat bot. 
 ![Screenshot](./_Documents/Screenshot.png)  
 
 
-
 ## Requirements
 
 You need to have an Azure OpenAI account and create at least one deployment. Set the api key and enpoint in your environment variables as explained below.

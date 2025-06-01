@@ -75,7 +75,7 @@ The default deployment name right after setup is 'gpt-4o'. If your deployment na
 
 All configurations are stored in a configuration file. That file is usually located here:
 ```powershell
-C:\Users\andre\AppData\Roaming\TrueAquarius\ChatBot\Configuration.json
+C:\Users\[user]\AppData\Roaming\TrueAquarius\ChatBot\Configuration.json
 ```
 The file can be edited with any editor. It looks somewhat like this:
 ```json

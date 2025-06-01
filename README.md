@@ -55,9 +55,9 @@ Change settings with `/`-commands. Type `/help` to get list of commands.
 
 
 ## How to make new release
-Building a release is supported by an GitHub Action ([release.yml](./actions/workflows/release.yml)), which gets triggered when a `git push` contains a tag which starts with the letter '`v`' like '`v1.0.0`'.
+Building a release is supported by an GitHub Action ([release.yml](.github/actions/workflows/release.yml)), which gets triggered when a `git push` contains a tag which starts with the letter '`v`' like '`v1.0.0`'.
 
-Extract form [release.yml](./actions/workflows/release.yml):
+Extract form [release.yml](.github/actions/workflows/release.yml):
 ```yml
 on:
   push:

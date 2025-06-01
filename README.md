@@ -22,7 +22,7 @@ Like all my "Hello"-projects, this is more a Hello World version of a chat bot. 
 
 ## Requirements
 
-You need to have an Azure OpenAI account and create at least one deployment. Set the api key and enpoint in your environment variables as explained below.
+You need to have an Azure OpenAI account and create at least one deployment. Set the api key and endpoint in your environment variables as explained below.
 
 ## Installation
 
@@ -55,9 +55,9 @@ Change settings with `/`-commands. Type `/help` to get list of commands.
 
 
 ## How to make new release
-Building a release is supported by an GitHub Action (release.yml), which gets triggered when a `git push` contains a tag which starts with the letter '`v`' like '`v1.0.0`'.
+Building a release is supported by an GitHub Action ([release.yml](./actions/workflows/release.yml)), which gets triggered when a `git push` contains a tag which starts with the letter '`v`' like '`v1.0.0`'.
 
-Extract form release.yml:
+Extract form [release.yml](./actions/workflows/release.yml):
 ```yml
 on:
   push:

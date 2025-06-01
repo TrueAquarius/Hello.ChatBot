@@ -53,7 +53,8 @@ public class Program
 
         // Start the Chat with the user  
         Console.ForegroundColor = SystemColor;
-        Console.WriteLine("Welcome to the TrueAquarius ChatBot!\n");
+        Console.WriteLine("Welcome to the TrueAquarius ChatBot!\n" + BuildInfo.All + "\n");
+
         ShowConfig();
 
         Console.ForegroundColor = SystemColor;
@@ -199,6 +200,9 @@ public class Program
             case "system":
                 ShowSystemPrompt();
                 return CommandType.COMMAND;
+            case "version":
+                ShowVersion();
+                return CommandType.COMMAND;
             case "model":
                 return ModelCommand(CommandBody(commandLine));
             case "clear":
@@ -246,6 +250,7 @@ public class Program
         Console.WriteLine("/temperature [value] -   Set the current temperature");
         Console.WriteLine("/tokens              -   Show the current max. output tokens");
         Console.WriteLine("/tokens [value]      -   Set the max. output tokens");
+        Console.WriteLine("/version             -   Show Version of Chat Bot");
         Console.WriteLine("Type your question or prompt to start chatting with the AI.");
 
         return CommandType.COMMAND;
@@ -282,6 +287,24 @@ public class Program
         Console.Write(" - Max. Output Tokens:  ");
         Console.ForegroundColor = InfoColor;
         Console.WriteLine(config.MaxOutputTokenCount);
+    }
+
+    private static void ShowVersion()
+    {
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - Version:      ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(BuildInfo.Version);
+
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - Build Number: ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(BuildInfo.BuildNumber);
+
+        Console.ForegroundColor = SystemColor;
+        Console.Write(" - Date:         ");
+        Console.ForegroundColor = InfoColor;
+        Console.WriteLine(BuildInfo.BuildDate);
     }
 
     private static CommandType ModelCommand(string commandLine)

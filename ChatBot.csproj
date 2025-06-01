@@ -13,4 +13,9 @@
     <PackageReference Include="TrueAquarius.ConfigManager" Version="1.0.0" />
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(OS)' == 'Windows_NT'">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ProjectDir)\_Scripts\UpdateBuildInfo.ps1&quot;" />
+  </Target>
+
+
 </Project>

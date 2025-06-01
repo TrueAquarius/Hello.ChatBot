@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write  # required to create a release
+
 jobs:
   build:
     runs-on: ubuntu-latest

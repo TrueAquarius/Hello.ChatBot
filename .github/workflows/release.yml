@@ -25,12 +25,16 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -r win-x64 --self-contained false -o ./publish
 
+      - name: Set ZIP filename
+        id: zipname
+        run: echo "ZIPNAME=ChatBot-${GITHUB_REF_NAME}.zip" >> $GITHUB_ENV
+
       - name: Zip output
-        run: cd publish && zip -r ../app.zip .
+        run: cd publish && zip -r ../$ZIPNAME .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: app.zip
+          files: ${{ env.ZIPNAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
